@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from streamlit_cropper import st_cropper
 from PIL import Image
+from io import BytesIO
 
 def process_image(img, size, num_colors, contrast, offset, c_min, c_max, outline_color):
     # Resize image
