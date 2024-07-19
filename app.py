@@ -3,8 +3,25 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from streamlit_cropper import st_cropper
-from PIL import Image
+from PIL import Image, ExifTags
 from io import BytesIO
+
+def fix_image_orientation(image):
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == 'Orientation':
+                break
+        exif = dict(image._getexif().items())
+
+        if exif[orientation] == 3:
+            image = image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image = image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image = image.rotate(90, expand=True)
+    except (AttributeError, KeyError, IndexError):
+        pass
+    return image
 
 def process_image(img, size, num_colors, contrast, offset, c_min, c_max, outline_color):
     # Resize image
@@ -44,6 +61,9 @@ uploaded_file = st.file_uploader("画像をアップロードしてください"
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
+    
+    # 画像の向きを修正
+    image = fix_image_orientation(image)
     
     # Cropping
     st.write("画像をトリミングしてください")
